@@ -593,7 +593,9 @@ def server_error(error):
     return jsonify({'error': 'Internal server error occurred.'}), 500
 
 if __name__ == '__main__':
-    print("\nStarting WorkSplit AI...")
-    print("Local access:   http://127.0.0.1:5000")
-    print("Network access: http://0.0.0.0:5000 (accessible by mobile devices on same Wi-Fi)\n")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\nStarting WorkSplit AI on port {port}...")
+    print(f"Local access:   http://127.0.0.1:{port}")
+    print(f"Network access: http://0.0.0.0:{port} (accessible across network)\n")
+    app.run(host='0.0.0.0', port=port, debug=False)
+
