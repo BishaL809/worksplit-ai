@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction History - WorkSplit AI{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Activity History</h2>
+            <p class="page-description">A simple timeline of all money received, expenses spent, and debts settled.</p>
+        </div>
+    </div>
+
+    <!-- Multi-Filter & Search Card -->
+    <div class="card filter-card">
+        <form id="unifiedFilterForm" class="filter-form">
+            <div class="filter-row">
+                <div class="filter-group flex-2">
+                    <label for="historySearch" class="filter-label">Search</label>
+                    <div class="input-search-wrapper">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input
+                            type="text"
+                            id="historySearch"
+                            class="form-control"
+                            placeholder="Search description, note, or person name..."
+                        >
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="historyTypeFilter" class="filter-label">Type</label>
+                    <select id="historyTypeFilter" class="form-control">
+                        <option value="all">All Activities</option>
+                        <option value="payment">Money Received (Income)</option>
+                        <option value="expense">Money Spent (Expenses)</option>
+                        <option value="settlement">Settlements (Debts Paid)</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="historyCategoryFilter" class="filter-label">Category</label>
+                    <select id="historyCategoryFilter" class="form-control">
+                        <option value="all">All Categories</option>
+                        <option value="Food">Food</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Education">Education</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="historyMemberFilter" class="filter-label">Member</label>
+                    <select id="historyMemberFilter" class="form-control">
+                        <option value="">All Members</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="historyStartDate" class="filter-label">From Date</label>
+                    <input type="date" id="historyStartDate" class="form-control">
+                </div>
+
+                <div class="filter-group">
+                    <label for="historyEndDate" class="filter-label">To Date</label>
+                    <input type="date" id="historyEndDate" class="form-control">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="button" id="btnResetHistoryFilters" class="btn btn-outline">Reset</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Filter Stats Summary Bar -->
+    <div class="history-stats-bar">
+        <span>Showing <strong id="filterMatchCount">0</strong> transactions</span>
+        <span>Filtered Total Volume: <strong id="filterTotalAmount">₹0.00</strong></span>
+    </div>
+
+    <!-- Unified Transactions Table Card -->
+    <div class="card table-card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Person</th>
+                        <th>Amount</th>
+                        <th>Participants</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Loading transaction records...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Expense Modal -->
+<div id="editExpenseModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalEditExpenseBackdrop"></div>
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Expense</h3>
+            <button type="button" class="modal-close" id="btnCloseEditExpenseModal">&times;</button>
+        </div>
+        <form id="editExpenseForm">
+            <input type="hidden" id="editExpenseId">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editExpenseDesc" class="form-label">Description <span class="required">*</span></label>
+                    <input type="text" id="editExpenseDesc" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-half">
+                        <label for="editExpenseAmount" class="form-label">Amount (₹) <span class="required">*</span></label>
+                        <input type="number" id="editExpenseAmount" class="form-control" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group col-half">
+                        <label for="editExpenseDate" class="form-label">Date <span class="required">*</span></label>
+                        <input type="date" id="editExpenseDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editExpenseCategory" class="form-label">Category <span class="required">*</span></label>
+                    <select id="editExpenseCategory" class="form-control" required>
+                        <option value="Food">Food</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Education">Education</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editExpensePaidBy" class="form-label">Paid By <span class="required">*</span></label>
+                    <select id="editExpensePaidBy" class="form-control" required></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="btnCancelExpenseEdit">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.svg') }}">
+    <title>{% block title %}WorkSplit AI{% endblock %}</title>
+    <!-- Chart.js (Local offline bundle with CDN fallback) -->
+    <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>');
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <a href="{{ url_for('dashboard_page') }}" class="brand-link">
+                    <span class="brand-logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </span>
+                    <div class="brand-text">
+                        <h1 class="brand-title">WorkSplit AI</h1>
+                        <p class="brand-subtitle">Split group earnings and expenses easily</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Active Group Selector & Help Button -->
+            <div class="header-group-selector">
+                <label for="activeGroupSelect" class="group-select-label">Group:</label>
+                <select id="activeGroupSelect" class="form-control group-select">
+                    <option value="" disabled>Loading groups...</option>
+                </select>
+                <a href="{{ url_for('groups_page') }}" class="btn btn-outline btn-sm" title="Manage Groups">Manage</a>
+                <button type="button" class="btn btn-sm btn-help" id="btnOpenHelpModal" title="Click for a simple guide on how to use this app">
+                    💡 How It Works
+                </button>
+            </div>
+
+            <nav class="app-nav">
+                <a href="{{ url_for('personal_page') }}" class="nav-link {% if request.path == '/personal' %}active{% endif %}" title="Track your daily personal expenses, budgets & savings">
+                    💳 Personal Tracker
+                </a>
+                <a href="{{ url_for('dashboard_page') }}" class="nav-link {% if request.path == '/dashboard' or request.path == '/' %}active{% endif %}" title="Group balances and settlement overview">
+                    👥 Group Dashboard
+                </a>
+                <a href="{{ url_for('groups_page') }}" class="nav-link {% if request.path == '/groups' %}active{% endif %}">
+                    Groups
+                </a>
+                <a href="{{ url_for('payments_page') }}" class="nav-link {% if request.path == '/payments' %}active{% endif %}" title="Money received by the group">
+                    Group Income
+                </a>
+                <a href="{{ url_for('expenses_page') }}" class="nav-link {% if request.path == '/expenses' %}active{% endif %}" title="Money spent by members">
+                    Group Expenses
+                </a>
+                <a href="{{ url_for('balances_page') }}" class="nav-link {% if request.path == '/balances' %}active{% endif %}" title="Who owes what">
+                    Balances
+                </a>
+                <a href="{{ url_for('settlement_page') }}" class="nav-link {% if request.path == '/settlement' %}active{% endif %}" title="Clear debts and pay back">
+                    Settle Up
+                </a>
+                <a href="{{ url_for('history_page') }}" class="nav-link {% if request.path == '/history' %}active{% endif %}">
+                    History
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <main class="main-content">
+        {% block content %}
+        {% if not_found %}
+        <div class="card empty-card">
+            <h2>Page Not Found</h2>
+            <p class="text-muted">The requested view does not exist.</p>
+            <a href="{{ url_for('dashboard_page') }}" class="btn btn-primary" style="margin-top: 1rem;">Go to Dashboard</a>
+        </div>
+        {% endif %}
+        {% endblock %}
+    </main>
+
+    <!-- How It Works / Easy Guide Modal -->
+    <div id="helpGuideModal" class="modal hidden">
+        <div class="modal-backdrop" id="modalHelpBackdrop"></div>
+        <div class="modal-dialog" style="max-width: 620px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💡 How to Use WorkSplit (Easy Guide)</h3>
+                <button type="button" class="modal-close" id="btnCloseHelpModal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem; line-height: 1.6;">
+                <p style="margin-bottom: 1.25rem; font-size: 0.95rem; color: var(--text-secondary);">
+                    WorkSplit AI helps your group track shared work money and expenses so everyone knows exactly who owes whom—with zero arguments.
+                </p>
+
+                <div class="help-step-box" style="display: flex; gap: 1rem; margin-bottom: 1rem; background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                    <div style="font-size: 1.75rem;">1️⃣</div>
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">Select or Create a Group</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+                            Go to <strong>Groups</strong> to create a team (e.g. "Ahmedabad Work", "College Project", or "Roommates") and add your friends' names.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="help-step-box" style="display: flex; gap: 1rem; margin-bottom: 1rem; background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                    <div style="font-size: 1.75rem;">2️⃣</div>
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">Add Money In &amp; Money Out</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                            <strong>💰 Income:</strong> When someone receives payment for the group's work, record it under Income so everyone gets their fair share.
+                        </p>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+                            <strong>🛒 Expenses:</strong> When a member buys food, travel, or tools, add an Expense. Our smart AI will pick the category automatically!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="help-step-box" style="display: flex; gap: 1rem; margin-bottom: 1.25rem; background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                    <div style="font-size: 1.75rem;">3️⃣</div>
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">Check "Settle Up"</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+                            Click <strong>Settle Up</strong> to see who pays whom. The app finds the fewest payments so all debts are cleared quickly.
+                        </p>
+                    </div>
+                </div>
+
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 1rem;">
+                    <h5 style="font-size: 0.875rem; font-weight: 700; color: #1e40af; margin-bottom: 0.35rem;">Understanding Your Balance:</h5>
+                    <ul style="font-size: 0.85rem; color: #1e3a8a; padding-left: 1.25rem; margin: 0; line-height: 1.6;">
+                        <li><strong style="color: #15803d;">🟢 Green (+):</strong> You get money back! Other members will pay you.</li>
+                        <li><strong style="color: #b91c1c;">🔴 Red (-):</strong> You owe money. You need to pay another member.</li>
+                        <li><strong>⚪ Settled (₹0.00):</strong> You are completely clear!</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnGotItHelp">Got It, Let's Go!</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p><strong>WorkSplit AI</strong> &bull; Fair group money splitting &amp; smart expense tracking made easy.</p>
+        </div>
+    </footer>
+
+    <!-- Shared Group Switcher Script -->
+    <script>
+        // Shared active group management
+        async function loadActiveGroups() {
+            try {
+                const res = await fetch('/api/groups');
+                const data = await res.json();
+                const select = document.getElementById('activeGroupSelect');
+                if (!select || !data.groups) return;
+
+                select.innerHTML = '';
+                if (data.groups.length === 0) {
+                    select.innerHTML = '<option value="">No Groups Found</option>';
+                    return;
+                }
+
+                let savedGroupId = localStorage.getItem('worksplit_active_group');
+                let validSelected = false;
+
+                data.groups.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.textContent = `${g.name} (${g.member_count} members)`;
+                    if (savedGroupId && String(g.id) === String(savedGroupId)) {
+                        opt.selected = true;
+                        validSelected = true;
+                    }
+                    select.appendChild(opt);
+                });
+
+                if (!validSelected && data.groups.length > 0) {
+                    select.selectedIndex = 0;
+                    localStorage.setItem('worksplit_active_group', data.groups[0].id);
+                }
+
+                select.addEventListener('change', () => {
+                    localStorage.setItem('worksplit_active_group', select.value);
+                    window.dispatchEvent(new CustomEvent('activeGroupChanged', { detail: { groupId: select.value } }));
+                });
+            } catch (err) {
+                console.error('Error loading groups in header:', err);
+            }
+        }
+
+        function getActiveGroupId() {
+            const select = document.getElementById('activeGroupSelect');
+            return select?.value || localStorage.getItem('worksplit_active_group') || 1;
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadActiveGroups();
+
+            // Help Modal handlers
+            const helpModal = document.getElementById('helpGuideModal');
+            const openHelpBtn = document.getElementById('btnOpenHelpModal');
+            const closeHelpBtn = document.getElementById('btnCloseHelpModal');
+            const gotItHelpBtn = document.getElementById('btnGotItHelp');
+            const helpBackdrop = document.getElementById('modalHelpBackdrop');
+
+            function openHelp() { helpModal?.classList.remove('hidden'); }
+            function closeHelp() { helpModal?.classList.add('hidden'); }
+
+            openHelpBtn?.addEventListener('click', openHelp);
+            closeHelpBtn?.addEventListener('click', closeHelp);
+            gotItHelpBtn?.addEventListener('click', closeHelp);
+            helpBackdrop?.addEventListener('click', closeHelp);
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

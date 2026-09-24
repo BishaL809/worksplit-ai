@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Settlement - WorkSplit AI{% endblock %}
+
+{% block content %}
+<div class="settlement-page">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Settle Up (Who Pays Whom)</h2>
+            <p class="page-description">The quickest, easiest way to clear all debts with the fewest payments.</p>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn btn-outline" id="btnOpenCustomSettlement">
+                + Record a Payment
+            </button>
+        </div>
+    </div>
+
+    <!-- Suggested Settlement Transfers Grid (Who Pays Whom) -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <h3 class="card-title">Who Should Pay Whom?</h3>
+            <span class="card-badge" id="settlementCountBadge">0 Payments Needed</span>
+        </div>
+        <div style="padding: 1.5rem;">
+            <div class="settlement-flow-grid" id="settlementFlowGrid">
+                <div class="text-center text-muted" style="grid-column: 1/-1;">Calculating easiest way to settle...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recorded Settlements History Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Payment History (Settled Debts)</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Who Paid (From)</th>
+                        <th>Who Received (To)</th>
+                        <th>Amount</th>
+                        <th>Notes</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="settlementsHistoryBody">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Loading recorded payments...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Record Settlement Modal -->
+<div id="recordSettlementModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalSettlementBackdrop"></div>
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title">Record Payment</h3>
+            <button type="button" class="modal-close" id="btnCloseSettlementModal">&times;</button>
+        </div>
+        <form id="recordSettlementForm">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group col-half">
+                        <label for="settlementFromMember" class="form-label">Who is paying? <span class="required">*</span></label>
+                        <select id="settlementFromMember" class="form-control" required></select>
+                    </div>
+                    <div class="form-group col-half">
+                        <label for="settlementToMember" class="form-label">Who is receiving? <span class="required">*</span></label>
+                        <select id="settlementToMember" class="form-control" required></select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-half">
+                        <label for="settlementAmount" class="form-label">Amount (₹) <span class="required">*</span></label>
+                        <div class="input-currency-wrapper">
+                            <span class="currency-symbol">₹</span>
+                            <input type="number" id="settlementAmount" class="form-control with-prefix" step="0.01" min="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group col-half">
+                        <label for="settlementDate" class="form-label">Date Paid <span class="required">*</span></label>
+                        <input type="date" id="settlementDate" class="form-control" value="{{ today }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="settlementNotes" class="form-label">Notes (Optional)</label>
+                    <input type="text" id="settlementNotes" class="form-control" placeholder="e.g. Paid via Google Pay, PhonePe, Cash...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="btnCancelSettlement">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btnSaveSettlement">Confirm Payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settlement.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Groups & Members - WorkSplit AI{% endblock %}
+
+{% block content %}
+<div class="groups-page">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Groups &amp; Team Members</h2>
+            <p class="page-description">Create groups for your college projects, trips, or flatmates, and add each person's name.</p>
+        </div>
+    </div>
+
+    <div class="details-grid">
+        <!-- 1. Groups Column -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Your Groups</h3>
+            </div>
+            <div style="padding: 1.25rem 1.5rem;">
+                <form id="createGroupForm" class="inline-add-form">
+                    <input type="text" id="newGroupName" class="form-control" placeholder="New group name (e.g. College Project, Goa Trip)..." required>
+                    <button type="submit" class="btn btn-primary">+ Create</button>
+                </form>
+
+                <div class="groups-list" id="groupsList" style="margin-top: 1.25rem;">
+                    <div class="text-muted text-center">Loading groups...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Members of Active Group Column -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">People in <span id="activeGroupTitleName" class="text-primary">Current Group</span></h3>
+            </div>
+            <div style="padding: 1.25rem 1.5rem;">
+                <form id="addMemberForm" class="inline-add-form">
+                    <input type="text" id="newMemberName" class="form-control" placeholder="Friend's name (e.g. Bishal, Rahul)..." required>
+                    <button type="submit" class="btn btn-primary">+ Add Member</button>
+                </form>
+
+                <div class="members-list" id="membersList" style="margin-top: 1.25rem;">
+                    <div class="text-muted text-center">Loading members...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Member Name Modal -->
+<div id="editMemberModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalMemberBackdrop"></div>
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title">Rename Member</h3>
+            <button type="button" class="modal-close" id="btnCloseMemberModal">&times;</button>
+        </div>
+        <form id="editMemberForm">
+            <input type="hidden" id="editMemberId">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editMemberNameInput" class="form-label">Member Name <span class="required">*</span></label>
+                    <input type="text" id="editMemberNameInput" class="form-control" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="btnCancelMemberEdit">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Name</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/groups.js') }}"></script>
+{% endblock %}

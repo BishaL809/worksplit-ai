@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Member Balances - WorkSplit AI{% endblock %}
+
+{% block content %}
+<div class="balances-page">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Who Owes What (Balances)</h2>
+            <p class="page-description">A clear, fair breakdown of what each person earned, spent, and needs to settle.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('settlement_page') }}" class="btn btn-primary">
+                Settle Up Now &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Friendly Math Explanation Card -->
+    <div class="card" style="margin-bottom: 2rem; background-color: #f8fafc; border-left: 4px solid var(--primary);">
+        <div style="padding: 1.25rem 1.5rem;">
+            <h4 style="font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                💡 How the Math Works (Simple &amp; 100% Accurate)
+            </h4>
+            <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0.5rem;">
+                No guessing or AI in financial calculations. The math is simple, fair, and transparent:
+            </p>
+            <div style="background: #ffffff; padding: 0.85rem 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.875rem; line-height: 1.6;">
+                <strong>Your Net Balance</strong> =
+                (<strong>Work Earned</strong> &minus; <strong>Cash Received In Hand</strong>)
+                + (<strong>Paid Out of Pocket</strong> &minus; <strong>Your Expense Share</strong>)
+                + (<strong>Settlements Paid</strong> &minus; <strong>Settlements Received</strong>)
+            </div>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.6rem; line-height: 1.6;">
+                &bull; <strong style="color: #15803d;">Positive (+₹)</strong>: You contributed more than you received &rarr; <em style="color: #15803d; font-weight: 600;">You will get money back</em>.<br>
+                &bull; <strong style="color: #b91c1c;">Negative (&minus;₹)</strong>: You received money or owe your share &rarr; <em style="color: #b91c1c; font-weight: 600;">You need to pay</em>.<br>
+                &bull; <strong>Balanced (₹0.00)</strong>: Total money to pay always equals total money to receive.
+            </p>
+        </div>
+    </div>
+
+    <!-- Detailed Balances Table Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Detailed Breakdown by Member</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Member Name</th>
+                        <th>Work Earned</th>
+                        <th>Cash In Hand</th>
+                        <th>Paid Out of Pocket</th>
+                        <th>Expense Share</th>
+                        <th>Settled So Far</th>
+                        <th>Net Balance</th>
+                        <th>What to Do</th>
+                    </tr>
+                </thead>
+                <tbody id="detailedBalancesBody">
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">Calculating member balances...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/balances.js') }}"></script>
+{% endblock %}

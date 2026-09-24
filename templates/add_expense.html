@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expense - AI Expense Categorizer{% endblock %}
+
+{% block content %}
+<div class="add-expense-page">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Add New Expense</h2>
+            <p class="page-description">Enter your expense details. The local NLP model will predict the category in real-time.</p>
+        </div>
+    </div>
+
+    <div class="form-container-card">
+        <form id="addExpenseForm" novalidate>
+            <!-- Expense Description -->
+            <div class="form-group">
+                <label for="description" class="form-label">
+                    Expense Description <span class="required">*</span>
+                </label>
+                <div class="input-with-button">
+                    <input
+                        type="text"
+                        id="description"
+                        name="description"
+                        class="form-control"
+                        placeholder="e.g., Pizza and burger with friends, Uber ride, Netflix subscription..."
+                        autocomplete="off"
+                        required
+                    >
+                    <button type="button" id="btnTriggerPredict" class="btn btn-secondary" title="Re-run AI prediction">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        Predict
+                    </button>
+                </div>
+                <span class="form-hint">Type a description and the AI will analyze the keywords automatically.</span>
+            </div>
+
+            <!-- AI Prediction Result Card / Banner -->
+            <div id="aiPredictionBox" class="ai-prediction-box hidden">
+                <div class="ai-prediction-header">
+                    <div class="ai-status-indicator">
+                        <span class="pulse-dot"></span>
+                        <span class="ai-title-text">AI Prediction</span>
+                    </div>
+                    <span id="aiConfidenceBadge" class="confidence-badge">0%</span>
+                </div>
+                <div class="ai-prediction-body">
+                    <div class="prediction-main-info">
+                        <span class="label">AI Predicted Category:</span>
+                        <strong id="aiPredictedCategory" class="predicted-category-name">Food</strong>
+                    </div>
+                    <div class="confidence-meter-container">
+                        <div class="confidence-meter-label">
+                            <span>Confidence: <strong id="aiConfidenceText">0%</strong></span>
+                            <span class="confidence-quality" id="confidenceQuality">High</span>
+                        </div>
+                        <div class="confidence-progress-bar">
+                            <div id="confidenceProgressFill" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-prediction-footer">
+                    <small class="text-muted">Not accurate? You can manually select the correct category below.</small>
+                </div>
+            </div>
+
+            <!-- Category Selector (Auto-filled by AI, manual editable) -->
+            <div class="form-group">
+                <label for="category" class="form-label">
+                    Category <span class="required">*</span>
+                </label>
+                <select id="category" name="category" class="form-control" required>
+                    <option value="" disabled selected>Select Category (AI will suggest)</option>
+                    <option value="Food">Food</option>
+                    <option value="Transportation">Transportation</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Bills">Bills</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Education">Education</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div id="manualCorrectionAlert" class="manual-correction-alert hidden">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                    <span><strong>Manual Correction:</strong> Changed from AI prediction "<span id="originalPredictionText"></span>" to "<span id="correctedCategoryText"></span>". The corrected category will be saved.</span>
+                </div>
+                <!-- Custom item name when category is 'Other' -->
+                <div id="otherCategoryWrapper" class="form-group hidden" style="margin-top: 0.875rem;">
+                    <label for="customOtherName" class="form-label">
+                        Specify Item / Category Name <span class="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="customOtherName"
+                        name="customOtherName"
+                        class="form-control"
+                        placeholder="e.g., Gym Membership, Pet Care, Donation, Laptop Repair..."
+                    >
+                    <span class="form-hint">Enter the specific item or purpose for this 'Other' category.</span>
+                </div>
+                <span class="form-hint">Category is automatically suggested by AI, but you have full manual control to correct it.</span>
+            </div>
+
+            <!-- Amount and Date in a 2-Column Grid -->
+            <div class="form-row">
+                <div class="form-group col-half">
+                    <label for="amount" class="form-label">
+                        Amount (₹) <span class="required">*</span>
+                    </label>
+                    <div class="input-currency-wrapper">
+                        <span class="currency-symbol">₹</span>
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            class="form-control with-prefix"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0.01"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group col-half">
+                    <label for="date" class="form-label">
+                        Date <span class="required">*</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        class="form-control"
+                        value="{{ today }}"
+                        required
+                    >
+                </div>
+            </div>
+
+            <input type="hidden" id="confidenceValue" name="confidence" value="1.0">
+
+            <!-- Submission Actions -->
+            <div class="form-actions">
+                <button type="submit" id="btnSubmitExpense" class="btn btn-primary btn-lg">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Save Expense
+                </button>
+                <a href="{{ url_for('dashboard_page') }}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quick Examples Panel for viva/demo testing -->
+    <div class="demo-examples-card">
+        <h4 class="demo-title">College Demo Quick Test Prompts</h4>
+        <p class="text-muted">Click any test prompt to quickly populate and evaluate the local AI classification:</p>
+        <div class="sample-chips">
+            <button type="button" class="chip-btn" data-desc="Pizza and burger" data-amount="300">Pizza and burger (Food)</button>
+            <button type="button" class="chip-btn" data-desc="Uber ride to campus" data-amount="250">Uber ride (Transportation)</button>
+            <button type="button" class="chip-btn" data-desc="Netflix subscription" data-amount="649">Netflix subscription (Entertainment)</button>
+            <button type="button" class="chip-btn" data-desc="Bought college books" data-amount="1200">Bought college books (Education)</button>
+            <button type="button" class="chip-btn" data-desc="Electricity bill" data-amount="1800">Electricity bill (Bills)</button>
+            <button type="button" class="chip-btn" data-desc="Bought Nike shoes" data-amount="3500">Bought Nike shoes (Shopping)</button>
+            <button type="button" class="chip-btn" data-desc="Bought medicine" data-amount="450">Bought medicine (Healthcare)</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/add_expense.js') }}"></script>
+{% endblock %}

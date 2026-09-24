@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Work Payments - WorkSplit AI{% endblock %}
+
+{% block content %}
+<div class="payments-page">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Record Group Income</h2>
+            <p class="page-description">Did your team get paid for project work or client tasks? Enter it here to split it fairly.</p>
+        </div>
+    </div>
+
+    <!-- Payment Entry Form Card -->
+    <div class="form-container-card" style="max-width: 820px; margin-bottom: 2rem;">
+        <h3 class="form-section-title">New Income Entry</h3>
+        <form id="addPaymentForm" novalidate>
+            <div class="form-row">
+                <div class="form-group col-half">
+                    <label for="paymentAmount" class="form-label">
+                        Amount Received (₹) <span class="required">*</span>
+                    </label>
+                    <div class="input-currency-wrapper">
+                        <span class="currency-symbol">₹</span>
+                        <input
+                            type="number"
+                            id="paymentAmount"
+                            name="amount"
+                            class="form-control with-prefix"
+                            placeholder="e.g. 2000"
+                            step="0.01"
+                            min="0.01"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group col-half">
+                    <label for="paymentDate" class="form-label">
+                        Date Received <span class="required">*</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="paymentDate"
+                        name="date"
+                        class="form-control"
+                        value="{{ today }}"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-half">
+                    <label for="paymentReceivedBy" class="form-label">
+                        Who Received the Money? <span class="required">*</span>
+                    </label>
+                    <select id="paymentReceivedBy" class="form-control" required>
+                        <option value="" disabled selected>Select who held the money...</option>
+                    </select>
+                    <span class="form-hint">The member who actually received the physical cash or bank transfer.</span>
+                </div>
+
+                <div class="form-group col-half">
+                    <label for="paymentNotes" class="form-label">What is this payment for? (Optional)</label>
+                    <input
+                        type="text"
+                        id="paymentNotes"
+                        class="form-control"
+                        placeholder="e.g. Client Milestone 1, Daily Wage, Project payment..."
+                    >
+                </div>
+            </div>
+
+            <!-- Split Method Selector -->
+            <div class="form-group">
+                <label class="form-label">How should this money be shared? <span class="required">*</span></label>
+                <div class="radio-pill-group">
+                    <label class="radio-pill">
+                        <input type="radio" name="paymentSplitMethod" value="equal" checked>
+                        <span>Split Equally (Same for all)</span>
+                    </label>
+                    <label class="radio-pill">
+                        <input type="radio" name="paymentSplitMethod" value="percentage">
+                        <span>By Percentage (%)</span>
+                    </label>
+                    <label class="radio-pill">
+                        <input type="radio" name="paymentSplitMethod" value="custom">
+                        <span>Exact Amounts (₹)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Participant Selection & Dynamic Shares Table -->
+            <div class="form-group">
+                <label class="form-label">Who Gets What Share?</label>
+                <div class="table-responsive">
+                    <table class="data-table" id="paymentSharesTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="selectAllPaymentParticipants" checked></th>
+                                <th>Member Name</th>
+                                <th id="paymentShareColHeader">Share Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentSharesBody">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">Loading group members...</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="split-total-row">
+                                <th colspan="2">Total Shares Sum:</th>
+                                <th id="paymentTotalSharesSum">₹0.00 / ₹0.00</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div id="paymentSplitValidationMsg" class="split-validation-msg hidden">
+                    Shares sum must equal the total amount received.
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="btnSubmitPayment" class="btn btn-primary btn-lg">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Save Income Entry
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Existing Payments Log -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Income History (Money Received)</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Notes</th>
+                        <th>Received By</th>
+                        <th>Total Amount</th>
+                        <th>Participant Shares</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentsTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Loading payments...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/payments.js') }}"></script>
+{% endblock %}
