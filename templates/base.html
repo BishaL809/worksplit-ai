@@ -53,20 +53,17 @@
             </div>
 
             <nav class="app-nav">
-                <a href="{{ url_for('personal_page') }}" class="nav-link {% if request.path == '/personal' %}active{% endif %}" title="Track your daily personal expenses, budgets & savings">
-                    💳 Personal Tracker
-                </a>
-                <a href="{{ url_for('dashboard_page') }}" class="nav-link {% if request.path == '/dashboard' or request.path == '/' %}active{% endif %}" title="Group balances and settlement overview">
-                    👥 Group Dashboard
+                <a href="{{ url_for('dashboard_page') }}" class="nav-link {% if request.path == '/dashboard' or request.path == '/' %}active{% endif %}">
+                    Dashboard
                 </a>
                 <a href="{{ url_for('groups_page') }}" class="nav-link {% if request.path == '/groups' %}active{% endif %}">
                     Groups
                 </a>
                 <a href="{{ url_for('payments_page') }}" class="nav-link {% if request.path == '/payments' %}active{% endif %}" title="Money received by the group">
-                    Group Income
+                    Income
                 </a>
                 <a href="{{ url_for('expenses_page') }}" class="nav-link {% if request.path == '/expenses' %}active{% endif %}" title="Money spent by members">
-                    Group Expenses
+                    Expenses
                 </a>
                 <a href="{{ url_for('balances_page') }}" class="nav-link {% if request.path == '/balances' %}active{% endif %}" title="Who owes what">
                     Balances

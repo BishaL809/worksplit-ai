@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, Response
 
 from services import database_service as db
 from services import settlement_service as settlement_svc
@@ -22,6 +22,11 @@ def index():
 @app.route('/dashboard')
 def dashboard_page():
     return render_template('dashboard.html')
+
+@app.route('/personal')
+def personal_page():
+    cur_month = datetime.now().strftime('%Y-%m')
+    return render_template('personal.html', cur_month=cur_month)
 
 @app.route('/groups')
 def groups_page():
@@ -449,6 +454,130 @@ def api_dashboard():
         'categories': cat_summary['categories'],
         'recent_transactions': recent_txns
     }), 200
+
+# -------------------------------------------------------------
+# Personal Expense Tracker API
+# -------------------------------------------------------------
+@app.route('/api/personal/transactions', methods=['GET', 'POST'])
+def api_personal_transactions():
+    if request.method == 'GET':
+        month = request.args.get('month')
+        tx_type = request.args.get('type')
+        category = request.args.get('category')
+        search = request.args.get('search')
+        txns = db.get_personal_transactions(month, tx_type, category, search)
+        return jsonify({'transactions': txns}), 200
+
+    data = request.get_json(silent=True) or request.form
+    try:
+        tx_type = str(data.get('type', 'expense')).lower()
+        title = str(data.get('title', '')).strip()
+        amount = float(data.get('amount', 0))
+        category = str(data.get('category', '')).strip()
+        payment_method = str(data.get('payment_method', 'UPI')).strip()
+        date = str(data.get('date', '')).strip() or datetime.now().strftime('%Y-%m-%d')
+        notes = str(data.get('notes', '')).strip()
+
+        if not title:
+            return jsonify({'error': 'Title is required.'}), 400
+        if amount <= 0:
+            return jsonify({'error': 'Amount must be greater than zero.'}), 400
+
+        # AI auto-categorization fallback
+        if not category:
+            pred = ai_svc.predict_category(title)
+            category = pred.get('category', 'Other')
+
+        tx_id = db.add_personal_transaction(tx_type, title, amount, category, payment_method, date, notes)
+        tx = db.get_personal_transaction_by_id(tx_id)
+        return jsonify({'success': True, 'transaction': tx}), 201
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': f'Invalid input: {str(e)}'}), 400
+    except Exception as e:
+        print(f"Error adding personal transaction: {e}")
+        return jsonify({'error': 'Failed to save transaction.'}), 500
+
+@app.route('/api/personal/transactions/<int:tx_id>', methods=['GET', 'PUT', 'DELETE'])
+def api_personal_transaction_detail(tx_id):
+    if request.method == 'GET':
+        tx = db.get_personal_transaction_by_id(tx_id)
+        if not tx:
+            return jsonify({'error': 'Transaction not found.'}), 404
+        return jsonify({'transaction': tx}), 200
+
+    if request.method == 'PUT':
+        data = request.get_json(silent=True) or request.form
+        try:
+            tx_type = str(data.get('type', 'expense')).lower()
+            title = str(data.get('title', '')).strip()
+            amount = float(data.get('amount', 0))
+            category = str(data.get('category', '')).strip()
+            payment_method = str(data.get('payment_method', 'UPI')).strip()
+            date = str(data.get('date', '')).strip() or datetime.now().strftime('%Y-%m-%d')
+            notes = str(data.get('notes', '')).strip()
+
+            if not title:
+                return jsonify({'error': 'Title is required.'}), 400
+            if amount <= 0:
+                return jsonify({'error': 'Amount must be greater than zero.'}), 400
+            if not category:
+                category = 'Other'
+
+            updated = db.update_personal_transaction(tx_id, tx_type, title, amount, category, payment_method, date, notes)
+            if not updated:
+                return jsonify({'error': 'Transaction not found.'}), 404
+            tx = db.get_personal_transaction_by_id(tx_id)
+            return jsonify({'success': True, 'transaction': tx}), 200
+        except (ValueError, TypeError) as e:
+            return jsonify({'error': f'Invalid input: {str(e)}'}), 400
+
+    if request.method == 'DELETE':
+        deleted = db.delete_personal_transaction(tx_id)
+        if not deleted:
+            return jsonify({'error': 'Transaction not found.'}), 404
+        return jsonify({'success': True, 'message': 'Transaction deleted.'}), 200
+
+@app.route('/api/personal/summary', methods=['GET'])
+def api_personal_summary():
+    month = request.args.get('month') or datetime.now().strftime('%Y-%m')
+    summary = db.get_personal_summary(month)
+    return jsonify(summary), 200
+
+@app.route('/api/personal/budget', methods=['GET', 'POST'])
+def api_personal_budget():
+    if request.method == 'GET':
+        month = request.args.get('month') or datetime.now().strftime('%Y-%m')
+        amount = db.get_personal_budget(month)
+        return jsonify({'month': month, 'budget_amount': amount}), 200
+
+    data = request.get_json(silent=True) or request.form
+    month = str(data.get('month', '')).strip() or datetime.now().strftime('%Y-%m')
+    try:
+        amount = float(data.get('budget_amount', 0))
+        db.set_personal_budget(month, amount)
+        return jsonify({'success': True, 'month': month, 'budget_amount': amount}), 200
+    except (ValueError, TypeError) as e:
+        return jsonify({'error': f'Invalid budget amount: {str(e)}'}), 400
+
+@app.route('/api/personal/export', methods=['GET'])
+def api_personal_export():
+    import csv
+    import io
+    month = request.args.get('month') or datetime.now().strftime('%Y-%m')
+    txns = db.get_personal_transactions(month=month)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['ID', 'Date', 'Type', 'Title', 'Category', 'Amount', 'Payment Method', 'Notes'])
+    for t in txns:
+        writer.writerow([t['id'], t['date'], t['type'], t['title'], t['category'], t['amount'], t.get('payment_method', ''), t.get('notes', '')])
+
+    csv_data = output.getvalue()
+    return Response(
+        csv_data,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=personal_transactions_{month}.csv'}
+    )
 
 # -------------------------------------------------------------
 # Global Error Handlers

@@ -29,14 +29,6 @@
 
     <!-- Quick Action Cards Bar (Simple 1-Click Buttons) -->
     <div class="quick-actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-        <a href="{{ url_for('personal_page') }}" class="quick-action-box" style="display: flex; align-items: center; gap: 1rem; background: #ffffff; padding: 1.1rem 1.25rem; border-radius: var(--radius-lg); border: 1px solid #bfdbfe; text-decoration: none; color: inherit; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;">
-            <div style="font-size: 2rem; background: #eff6ff; width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">💳</div>
-            <div>
-                <strong style="display: block; font-size: 1rem; color: var(--primary); font-weight: 700;">Personal Tracker</strong>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Daily expenses &amp; budget</span>
-            </div>
-        </a>
-
         <a href="{{ url_for('expenses_page') }}" class="quick-action-box" style="display: flex; align-items: center; gap: 1rem; background: #ffffff; padding: 1.1rem 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-decoration: none; color: inherit; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;">
             <div style="font-size: 2rem; background: #fef2f2; width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">🛒</div>
             <div>
