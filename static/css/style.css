@@ -1361,3 +1361,259 @@ body {
     background-color: var(--primary-light);
 }
 
+/* =========================================================
+   Mobile Bottom Navigation Bar (Android Phone View)
+   ========================================================= */
+
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 500;
+    height: 100%;
+    gap: 2px;
+    transition: color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item.active {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+    color: var(--primary);
+    background-color: var(--primary-light);
+    border-radius: var(--radius-full);
+    padding: 2px 12px;
+}
+
+.bottom-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mobile-only-link {
+    display: none;
+}
+
+/* =========================================================
+   Mobile App-First Responsive Styles (Native Phone Experience)
+   ========================================================= */
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        font-size: 15px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-only-link {
+        display: inline-flex !important;
+    }
+
+    .mobile-bottom-nav {
+        display: flex !important;
+    }
+
+    .app-nav {
+        display: none !important;
+    }
+
+    .app-footer {
+        display: none !important;
+    }
+
+    .header-container {
+        padding: 0.6rem 0.85rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .brand-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .brand-subtitle {
+        display: none;
+    }
+
+    .header-group-selector {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: var(--bg-canvas);
+        padding: 0.35rem 0.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .header-group-selector select {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.5rem;
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+    }
+
+    .header-group-selector .btn {
+        padding: 0.45rem 0.65rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .main-content {
+        padding: 0.85rem 0.85rem 5.5rem 0.85rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .page-header {
+        margin-bottom: 1.1rem;
+        gap: 0.65rem;
+    }
+
+    .page-title {
+        font-size: 1.3rem;
+    }
+
+    .page-description {
+        font-size: 0.82rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.65rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    /* Quick Action Cards stacked for easy tapping */
+    .quick-actions-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.65rem !important;
+    }
+
+    .quick-action-box {
+        padding: 0.9rem 1rem !important;
+    }
+
+    /* KPI metrics 2-column grid on phones */
+    .metrics-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.65rem !important;
+    }
+
+    .metric-card {
+        padding: 0.85rem 1rem !important;
+    }
+
+    .metric-value {
+        font-size: 1.2rem !important;
+    }
+
+    .metric-footer {
+        font-size: 0.7rem !important;
+    }
+
+    /* Form inputs full-width and touch-friendly */
+    .form-row {
+        flex-direction: column !important;
+        gap: 0 !important;
+    }
+
+    .col-half {
+        width: 100% !important;
+    }
+
+    .form-control {
+        font-size: 16px !important;
+        padding: 0.75rem 0.85rem !important;
+    }
+
+    .btn-lg {
+        width: 100%;
+        padding: 0.85rem 1.25rem !important;
+        font-size: 1rem !important;
+    }
+
+    /* Charts & Details grids */
+    .charts-grid, .details-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    /* Member balance cards */
+    .member-balance-cards-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.65rem !important;
+    }
+
+    .member-balance-card {
+        padding: 0.85rem !important;
+    }
+
+    /* Table scrolling container */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius-sm);
+    }
+
+    .data-table th, .data-table td {
+        padding: 0.65rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    /* Radio pills */
+    .radio-pill-group {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .radio-pill span {
+        text-align: center;
+        padding: 0.6rem 0.85rem;
+    }
+}
+
